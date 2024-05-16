@@ -194,13 +194,13 @@ export default function Home() {
                   <>
                     <button
                       onClick={() => handleFirstPoint(team, "raids")}
-                      className="bg-blue-500 text-white px-4 py-3"
+                      className="bg-blue-500 text-white px-3 py-3"
                     >
                       +1.5
                     </button>
                     <button
                       onClick={() => handleRegularPoint(team, "raids", 1)}
-                      className="bg-green-500 text-white px-4 py-3"
+                      className="bg-green-500 text-white px-10 py-3"
                     >
                       +
                     </button>
@@ -219,13 +219,13 @@ export default function Home() {
                   <>
                     <button
                       onClick={() => handleFirstPoint(team, "stops")}
-                      className="bg-blue-500 text-white px-4 py-3"
+                      className="bg-blue-500 text-white px-3 py-3"
                     >
                       +1.5
                     </button>
                     <button
                       onClick={() => handleRegularPoint(team, "stops", 1)}
-                      className="bg-green-500 text-white px-4 py-3"
+                      className="bg-green-500 text-white px-10 py-3"
                     >
                       +
                     </button>
@@ -242,24 +242,32 @@ export default function Home() {
           </div>
         ))}
       </div>
-      <div className="fixed bottom-0 left-0 right-0 bg-violet-700 text-white py-4 hidden md:block">
-        <div className="flex justify-between items-center px-8">
-          <div className="text-4xl font-bold">{teamA.name}</div>
-          <div className="text-4xl font-bold">
-            {teamA.totalPoints} vs {teamB.totalPoints}
-          </div>
-          <div className="text-4xl font-bold">{teamB.name}</div>
-        </div>
-        <div className="flex justify-between items-center px-8">
-          <div className="flex gap-4 text-2xl font-bold">
+      <div className="fixed bottom-0 left-0 right-0 bg-violet-700 text-white py-2 hidden md:block">
+        <div className="flex gap-8 justify-center items-center px-8">
+          <div className="flex gap-4 text-2xl font-bold mx-6">
             <div className="flex">Raids: {teamA.raids}</div>
             <div className="flex">Stops: {teamA.stops}</div>
           </div>
-          <div className="flex gap-4 text-2xl font-bold">
+          <div className="text-4xl font-bold">{teamA.name}</div>
+          <div className="text-4xl font-bold bg-white text-black px-4 py-2">
+            {teamA.totalPoints} vs {teamB.totalPoints}
+          </div>
+          <div className="text-4xl font-bold">{teamB.name}</div>
+          <div className="flex gap-4 text-2xl font-bold mx-24">
             <div className="flex">Raids: {teamB.raids}</div>
             <div className="flex">Stops: {teamB.stops}</div>
           </div>
         </div>
+        {/* <div className="flex justify-center items-center px-8">
+          <div className="flex gap-4 text-2xl font-bold mx-6">
+            <div className="flex">Raids: {teamA.raids}</div>
+            <div className="flex">Stops: {teamA.stops}</div>
+          </div>
+          <div className="flex gap-4 text-2xl font-bold mx-24">
+            <div className="flex">Raids: {teamB.raids}</div>
+            <div className="flex">Stops: {teamB.stops}</div>
+          </div>
+        </div> */}
       </div>
     </div>
   );
