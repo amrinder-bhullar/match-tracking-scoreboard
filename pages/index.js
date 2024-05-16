@@ -192,23 +192,25 @@ export default function Home() {
                 <h3>Raids: {team.raids}</h3>
                 {mode === "admin" && (
                   <>
-                    <button
-                      onClick={() => handleFirstPoint(team, "raids")}
-                      className="bg-blue-500 text-white px-3 py-3"
-                    >
-                      +1.5
-                    </button>
+                    <div className="w-full min-w-32 flex">
+                      <button
+                        onClick={() => handleFirstPoint(team, "raids")}
+                        className="bg-blue-500 text-white w-1/2 py-3"
+                      >
+                        +1.5
+                      </button>
+                      <button
+                        onClick={() => handleRegularPoint(team, "raids", -1)}
+                        className="bg-red-500 text-white py-3 w-1/2"
+                      >
+                        -
+                      </button>
+                    </div>
                     <button
                       onClick={() => handleRegularPoint(team, "raids", 1)}
-                      className="bg-green-500 text-white px-10 py-3"
+                      className="bg-green-500 text-white w-full py-3"
                     >
                       +
-                    </button>
-                    <button
-                      onClick={() => handleRegularPoint(team, "raids", -1)}
-                      className="bg-red-500 text-white px-4 py-3"
-                    >
-                      -
                     </button>
                   </>
                 )}
@@ -217,23 +219,25 @@ export default function Home() {
                 <h3>Stops: {team.stops}</h3>
                 {mode === "admin" && (
                   <>
-                    <button
-                      onClick={() => handleFirstPoint(team, "stops")}
-                      className="bg-blue-500 text-white px-3 py-3"
-                    >
-                      +1.5
-                    </button>
+                    <div className="w-full min-w-32 flex">
+                      <button
+                        onClick={() => handleFirstPoint(team, "stops")}
+                        className="bg-blue-500 text-white  w-1/2 py-3"
+                      >
+                        +1.5
+                      </button>
+                      <button
+                        onClick={() => handleRegularPoint(team, "stops", -1)}
+                        className="bg-red-500 text-white  w-1/2 py-3"
+                      >
+                        -
+                      </button>
+                    </div>
                     <button
                       onClick={() => handleRegularPoint(team, "stops", 1)}
-                      className="bg-green-500 text-white px-10 py-3"
+                      className="bg-green-500 text-white w-full py-3"
                     >
                       +
-                    </button>
-                    <button
-                      onClick={() => handleRegularPoint(team, "stops", -1)}
-                      className="bg-red-500 text-white px-4 py-3"
-                    >
-                      -
                     </button>
                   </>
                 )}
