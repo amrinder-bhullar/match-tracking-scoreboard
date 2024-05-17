@@ -24,7 +24,7 @@ export default function Home() {
 
     let interval;
     if (mode === "client") {
-      interval = setInterval(fetchTeams, 3000); // Fetch data every 3 seconds in client mode
+      interval = setInterval(fetchTeams, 1500); // Fetch data every 1.5 seconds in client mode
     }
     return () => clearInterval(interval); // Clear interval on unmount
   }, [mode]);
@@ -246,19 +246,19 @@ export default function Home() {
           </div>
         ))}
       </div>
-      <div className="fixed bottom-0 left-0 right-0 bg-violet-700 text-white py-2 hidden md:block">
-        <div className="flex gap-8 justify-center items-center px-8">
-          <div className="flex gap-4 text-2xl font-bold mx-6">
-            <div className="flex">Raids: {teamA.raids}</div>
+      <div className="fixed bottom-0 left-0 right-0 bg-golden text-black py-2 hidden md:block">
+        <div className="flex justify-center items-center px-8">
+          <div className="flex text-2xl font-bold mr-10">
+            <div className="flex mr-4">Raids: {teamA.raids}</div>
             <div className="flex">Stops: {teamA.stops}</div>
           </div>
-          <div className="text-4xl font-bold">{teamA.name}</div>
+          <div className="text-4xl font-bold mr-10">{teamA.name}</div>
           <div className="text-4xl font-bold bg-white text-black px-4 py-2">
             {teamA.totalPoints} vs {teamB.totalPoints}
           </div>
-          <div className="text-4xl font-bold">{teamB.name}</div>
-          <div className="flex gap-4 text-2xl font-bold mx-24">
-            <div className="flex">Raids: {teamB.raids}</div>
+          <div className="text-4xl font-bold ml-10">{teamB.name}</div>
+          <div className="flex text-2xl font-bold ml-10">
+            <div className="flex mr-4">Raids: {teamB.raids}</div>
             <div className="flex">Stops: {teamB.stops}</div>
           </div>
         </div>

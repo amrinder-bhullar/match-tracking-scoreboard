@@ -25,6 +25,9 @@ module.exports = {
         violet: {
           700: "#5D3FD3",
         },
+        golden: {
+          DEFAULT: "#FFD700",
+        },
       },
     },
   },
