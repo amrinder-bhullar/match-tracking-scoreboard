@@ -7,13 +7,13 @@ export default async function handler(req, res) {
 
   if (req.method === "POST") {
     try {
-      const { _id, name, raids, stops } = req.body;
-      const totalPoints = raids + stops;
+      const { _id, name, raids, stops, out, doubleTouch } = req.body;
+      const totalPoints = raids + stops + out + doubleTouch;
       const result = await db
         .collection("teams")
         .findOneAndUpdate(
           { _id: new ObjectId(_id) },
-          { $set: { name, raids, stops, totalPoints } },
+          { $set: { name, raids, stops, out, doubleTouch, totalPoints } },
           { returnDocument: "after", upsert: true }
         );
       res.status(200).json(result);

@@ -7,6 +7,8 @@ export default function Home() {
     name: "Team A",
     raids: 0,
     stops: 0,
+    out: 0,
+    doubleTouch: 0,
     totalPoints: 0,
   });
   const [teamB, setTeamB] = useState({
@@ -14,6 +16,8 @@ export default function Home() {
     name: "Team B",
     raids: 0,
     stops: 0,
+    out: 0,
+    doubleTouch: 0,
     totalPoints: 0,
   });
   const [inputA, setInputA] = useState("Team A");
@@ -38,6 +42,8 @@ export default function Home() {
           name: "Team A",
           raids: 0,
           stops: 0,
+          out: 0,
+          doubleTouch: 0,
           totalPoints: 0,
         };
         const teamBData = data.find((team) => team.team === "teamB") || {
@@ -45,6 +51,8 @@ export default function Home() {
           name: "Team B",
           raids: 0,
           stops: 0,
+          out: 0,
+          doubleTouch: 0,
           totalPoints: 0,
         };
         setTeamA(teamAData);
@@ -54,7 +62,11 @@ export default function Home() {
 
   const updateTeam = (team, action, amount) => {
     const updatedTeam = { ...team, [action]: team[action] + amount };
-    updatedTeam.totalPoints = updatedTeam.raids + updatedTeam.stops;
+    updatedTeam.totalPoints =
+      updatedTeam.raids +
+      updatedTeam.stops +
+      updatedTeam.out +
+      updatedTeam.doubleTouch;
     fetch("/api/teams/update", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
@@ -82,12 +94,12 @@ export default function Home() {
     const newTeamA = {
       ...teamA,
       name: inputA,
-      totalPoints: teamA.raids + teamA.stops,
+      totalPoints: teamA.raids + teamA.stops + teamA.out + teamA.doubleTouch,
     };
     const newTeamB = {
       ...teamB,
       name: inputB,
-      totalPoints: teamB.raids + teamB.stops,
+      totalPoints: teamB.raids + teamB.stops + teamA.out + teamA.doubleTouch,
     };
     setTeamA(newTeamA);
     setTeamB(newTeamB);
@@ -112,6 +124,8 @@ export default function Home() {
           name: "Team A",
           raids: 0,
           stops: 0,
+          out: 0,
+          doubleTouch: 0,
           totalPoints: 0,
         };
         const teamBData = data.find((team) => team.team === "teamB") || {
@@ -119,6 +133,8 @@ export default function Home() {
           name: "Team B",
           raids: 0,
           stops: 0,
+          out: 0,
+          doubleTouch: 0,
           totalPoints: 0,
         };
         setTeamA(teamAData);
@@ -187,7 +203,7 @@ export default function Home() {
           <div key={index} className="border p-4">
             <h2 className="text-xl font-bold mb-4">{team.name}</h2>
             <p>Total Points: {team.totalPoints}</p>
-            <div className="flex justify-between mt-4">
+            <div className="flex flex-wrap justify-between mt-4">
               <div>
                 <h3>Raids: {team.raids}</h3>
                 {mode === "admin" && (
@@ -242,24 +258,84 @@ export default function Home() {
                   </>
                 )}
               </div>
+              <div>
+                <h3>Out: {team.out}</h3>
+                {mode === "admin" && (
+                  <>
+                    <div className="w-full min-w-32 flex">
+                      <button
+                        onClick={() => handleFirstPoint(team, "out")}
+                        className="bg-blue-500 text-white  w-1/2 py-3"
+                      >
+                        +1.5
+                      </button>
+                      <button
+                        onClick={() => handleRegularPoint(team, "out", -1)}
+                        className="bg-red-500 text-white w-1/2 py-3"
+                      >
+                        -
+                      </button>
+                    </div>
+                    <button
+                      onClick={() => handleRegularPoint(team, "out", 1)}
+                      className="bg-green-500 text-white w-full py-3"
+                    >
+                      +
+                    </button>
+                  </>
+                )}
+              </div>
+              <div>
+                <h3>Double Touch: {team.doubleTouch}</h3>
+                {mode === "admin" && (
+                  <>
+                    <div className="w-full min-w-32 flex">
+                      <button
+                        onClick={() => handleFirstPoint(team, "doubleTouch")}
+                        className="bg-blue-500 text-white w-1/2 py-3"
+                      >
+                        +1.5
+                      </button>
+                      <button
+                        onClick={() =>
+                          handleRegularPoint(team, "doubleTouch", -1)
+                        }
+                        className="bg-red-500 text-white w-1/2 py-3"
+                      >
+                        -
+                      </button>
+                    </div>
+                    <button
+                      onClick={() => handleRegularPoint(team, "doubleTouch", 1)}
+                      className="bg-green-500 text-white w-full py-3"
+                    >
+                      +
+                    </button>
+                  </>
+                )}
+              </div>
             </div>
           </div>
         ))}
       </div>
       <div className="fixed bottom-0 left-0 right-0 bg-golden text-black py-2 hidden md:block">
         <div className="flex justify-center items-center px-8">
-          <div className="flex text-2xl font-bold mr-10">
-            <div className="flex mr-4">Raids: {teamA.raids}</div>
-            <div className="flex">Stops: {teamA.stops}</div>
+          <div className="grid grid-cols-2 text-2xl font-bold mr-10">
+            <div className="mr-4">Raids: {teamA.raids}</div>
+            <div>Stops: {teamA.stops}</div>
+            <div>Out: {teamA.out}</div>
+            <div>DT: {teamA.doubleTouch}</div>
           </div>
           <div className="text-4xl font-bold mr-10">{teamA.name}</div>
           <div className="text-4xl font-bold bg-white text-black px-4 py-2">
             {teamA.totalPoints} vs {teamB.totalPoints}
           </div>
           <div className="text-4xl font-bold ml-10">{teamB.name}</div>
-          <div className="flex text-2xl font-bold ml-10">
+          <div className="grid grid-cols-2 text-2xl font-bold ml-10">
             <div className="flex mr-4">Raids: {teamB.raids}</div>
-            <div className="flex">Stops: {teamB.stops}</div>
+            <div>Stops: {teamB.stops}</div>
+            <div>Out: {teamB.out}</div>
+            <div>DT: {teamB.doubleTouch}</div>
           </div>
         </div>
         {/* <div className="flex justify-center items-center px-8">

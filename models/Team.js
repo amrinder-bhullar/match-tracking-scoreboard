@@ -15,6 +15,14 @@ const TeamSchema = new mongoose.Schema(
       type: Number,
       default: 0,
     },
+    out: {
+      type: Number,
+      default: 0,
+    },
+    doubleTouch: {
+      type: Number,
+      default: 0,
+    },
   },
   { timestamps: true }
 );

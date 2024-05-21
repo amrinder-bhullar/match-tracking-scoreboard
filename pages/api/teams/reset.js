@@ -8,7 +8,18 @@ export default async function handler(req, res) {
     try {
       await db
         .collection("teams")
-        .updateMany({}, { $set: { raids: 0, stops: 0, totalPoints: 0 } });
+        .updateMany(
+          {},
+          {
+            $set: {
+              raids: 0,
+              stops: 0,
+              out: 0,
+              doubleTouch: 0,
+              totalPoints: 0,
+            },
+          }
+        );
       const teams = await db.collection("teams").find({}).toArray();
       res.status(200).json(teams);
     } catch (error) {
