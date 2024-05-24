@@ -8,6 +8,22 @@ export default async function handler(req, res) {
   if (req.method === "POST") {
     try {
       const { teamId, playerId, playerType, show } = req.body;
+
+      // First, update all players' show field to false for the given playerType
+      await db
+        .collection("playing_teams")
+        .updateMany({}, { $set: { [`${playerType}.$[].show`]: false } });
+
+      // If playerType is 'raiders', also set all stoppers to show: false after 30 seconds
+      if (playerType === "raiders" && show) {
+        // setTimeout(async () => {
+        await db
+          .collection("playing_teams")
+          .updateMany({}, { $set: { [`stoppers.$[].show`]: false } });
+        // }, 30000);
+      }
+
+      // Update the specific player's show field
       const updateField = `${playerType}.$[elem].show`;
       const result = await db
         .collection("playing_teams")

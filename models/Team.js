@@ -1,3 +1,4 @@
+import { ObjectId } from "mongodb";
 import mongoose from "mongoose";
 
 const TeamSchema = new mongoose.Schema(
@@ -6,6 +7,9 @@ const TeamSchema = new mongoose.Schema(
       type: String,
       required: true,
       unique: true,
+    },
+    selecedTeamId: {
+      type: ObjectId,
     },
     raids: {
       type: Number,

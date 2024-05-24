@@ -1,7 +1,11 @@
+import PlayersList from "@/components/playersList/PlayersList";
+import Scoreboard from "@/components/scoreboard/Scoreboard";
+import { useRef } from "react";
 import { useState, useEffect } from "react";
 
 export default function Home() {
   const [mode, setMode] = useState("admin"); // Mode state to switch between admin and client mode
+  const [teams, setTeams] = useState([]);
   const [teamA, setTeamA] = useState({
     _id: "",
     name: "Team A",
@@ -10,6 +14,7 @@ export default function Home() {
     out: 0,
     doubleTouch: 0,
     totalPoints: 0,
+    team: "teamA",
   });
   const [teamB, setTeamB] = useState({
     _id: "",
@@ -19,16 +24,27 @@ export default function Home() {
     out: 0,
     doubleTouch: 0,
     totalPoints: 0,
+    team: "teamB",
   });
   const [inputA, setInputA] = useState("Team A");
   const [inputB, setInputB] = useState("Team B");
+  const [selectedTeamA, setSelectedTeamA] = useState(null);
+  const [selectedTeamB, setSelectedTeamB] = useState(null);
+  // const [highlightedPlayer, setHighlightedPlayer] = useState(null);
+  const [highlightedRaider, setHighlightedRaider] = useState(null);
+  const [highlightedStopper, setHighlightedStopper] = useState(null);
+  const timeoutRef = useRef(null);
 
   useEffect(() => {
     fetchTeams();
+    fetchTeamsList();
 
     let interval;
     if (mode === "client") {
-      interval = setInterval(fetchTeams, 1500); // Fetch data every 1.5 seconds in client mode
+      interval = setInterval(() => {
+        fetchTeams();
+        fetchActiveRaid();
+      }, 1500); // Fetch data every 1.5 seconds in client mode
     }
     return () => clearInterval(interval); // Clear interval on unmount
   }, [mode]);
@@ -59,6 +75,13 @@ export default function Home() {
         setTeamB(teamBData);
       });
   };
+  const fetchTeamsList = () => {
+    fetch("/api/playing_teams")
+      .then((response) => response.json())
+      .then((data) => {
+        setTeams(data);
+      });
+  };
 
   const updateTeam = (team, action, amount) => {
     const updatedTeam = { ...team, [action]: team[action] + amount };
@@ -82,6 +105,17 @@ export default function Home() {
       });
   };
 
+  const handleTeamSelection = (teamId, teamSide) => {
+    const selectedTeam = teams.find((team) => team._id === teamId);
+    if (teamSide === "A") {
+      setSelectedTeamA(selectedTeam);
+      setInputA(selectedTeam.name);
+    } else {
+      setSelectedTeamB(selectedTeam);
+      setInputB(selectedTeam.name);
+    }
+  };
+
   const handleFirstPoint = (team, action) => {
     updateTeam(team, action, 1.5);
   };
@@ -93,12 +127,14 @@ export default function Home() {
   const handleSaveTeams = () => {
     const newTeamA = {
       ...teamA,
-      name: inputA,
+      name: selectedTeamA.name,
+      slectedTeamId: selectedTeamA._id,
       totalPoints: teamA.raids + teamA.stops + teamA.out + teamA.doubleTouch,
     };
     const newTeamB = {
       ...teamB,
-      name: inputB,
+      name: selectedTeamB.name,
+      slectedTeamId: selectedTeamB._id,
       totalPoints: teamB.raids + teamB.stops + teamA.out + teamA.doubleTouch,
     };
     setTeamA(newTeamA);
@@ -144,6 +180,100 @@ export default function Home() {
       });
   };
 
+  const handlePlayerHighlight = (teamId, playerId, playerType, playerName) => {
+    if (highlightedRaider) {
+      // Hide currently highlighted player immediately
+      fetch("/api/playing_teams/update", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          teamId: highlightedRaider.teamId,
+          playerId: highlightedRaider.playerId,
+          playerType: highlightedRaider.playerType,
+          playerName: highlightedRaider.playerName,
+          show: false,
+        }),
+      });
+    }
+    // Clear the previous timeout if it exists
+    if (timeoutRef.current) {
+      clearTimeout(timeoutRef.current);
+    }
+
+    // Highlight new player
+    fetch("/api/playing_teams/update", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        teamId,
+        playerId,
+        playerType,
+        playerName,
+        show: true,
+      }),
+    }).then(() => {
+      setHighlightedRaider({
+        teamId,
+        playerId,
+        playerName,
+        playerType,
+      });
+      // Set a new timeout
+      timeoutRef.current = setTimeout(() => {
+        fetch("/api/playing_teams/update", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ teamId, playerId, playerType, show: false }),
+        }).then(() => {
+          setHighlightedRaider(null);
+        });
+      }, 30000);
+    });
+  };
+
+  const handleStopperHighlight = (teamId, playerId, playerType, playerName) => {
+    if (highlightedRaider && highlightedRaider.playerType === "raiders") {
+      fetch("/api/playing_teams/update", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          teamId: highlightedRaider.teamId,
+          playerId: highlightedRaider.playerId,
+          playerType: "raiders",
+          show: false,
+        }),
+      });
+    }
+
+    fetch("/api/playing_teams/update", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        teamId,
+        playerId,
+        playerType,
+        playerName,
+        show: true,
+      }),
+    }).then(() => {
+      setHighlightedStopper({
+        teamId,
+        playerId,
+        playerName,
+        playerType,
+      });
+    });
+  };
+
+  const fetchActiveRaid = () => {
+    fetch("/api/playing_teams/active_raid")
+      .then((response) => response.json())
+      .then((data) => {
+        setHighlightedRaider(data.raider);
+        setHighlightedStopper(data.stopper);
+      });
+  };
+
   return (
     <div className="container mx-auto p-4">
       <div className="flex justify-between items-center mb-4">
@@ -172,7 +302,7 @@ export default function Home() {
       </div>
       {mode === "admin" && (
         <div className="flex flex-col md:flex-row md:justify-between mb-4 space-y-4 md:space-y-0">
-          <input
+          {/* <input
             type="text"
             value={inputA}
             onChange={(e) => setInputA(e.target.value)}
@@ -183,7 +313,29 @@ export default function Home() {
             value={inputB}
             onChange={(e) => setInputB(e.target.value)}
             className="border p-2"
-          />
+          /> */}
+          <select
+            onChange={(e) => handleTeamSelection(e.target.value, "A")}
+            className="border p-2"
+          >
+            <option value="">Select Team A</option>
+            {teams.map((team) => (
+              <option key={team._id} value={team._id}>
+                {team.name}
+              </option>
+            ))}
+          </select>
+          <select
+            onChange={(e) => handleTeamSelection(e.target.value, "B")}
+            className="border p-2"
+          >
+            <option value="">Select Team B</option>
+            {teams.map((team) => (
+              <option key={team._id} value={team._id}>
+                {team.name}
+              </option>
+            ))}
+          </select>
           <button
             onClick={handleSaveTeams}
             className="bg-blue-500 text-white px-4 py-2"
@@ -200,155 +352,233 @@ export default function Home() {
       )}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
         {[teamA, teamB].map((team, index) => (
-          <div key={index} className="border p-4">
-            <h2 className="text-xl font-bold mb-4">{team.name}</h2>
-            <p>Total Points: {team.totalPoints}</p>
-            <div className="flex flex-wrap justify-between mt-4">
-              <div>
-                <h3>Raids: {team.raids}</h3>
-                {mode === "admin" && (
-                  <>
-                    <div className="w-full min-w-32 flex">
+          <>
+            <div key={index} className="border p-4">
+              <h2 className="text-xl font-bold mb-4">{team.name}</h2>
+              <p>Total Points: {team.totalPoints}</p>
+              <div className="flex flex-wrap justify-between mt-4">
+                <div>
+                  <h3>Raids: {team.raids}</h3>
+                  {mode === "admin" && (
+                    <>
+                      <div className="w-full min-w-32 flex">
+                        <button
+                          onClick={() => handleFirstPoint(team, "raids")}
+                          className="bg-blue-500 text-white w-1/2 py-3"
+                        >
+                          +1.5
+                        </button>
+                        <button
+                          onClick={() => handleRegularPoint(team, "raids", -1)}
+                          className="bg-red-500 text-white py-3 w-1/2"
+                        >
+                          -
+                        </button>
+                      </div>
                       <button
-                        onClick={() => handleFirstPoint(team, "raids")}
-                        className="bg-blue-500 text-white w-1/2 py-3"
+                        onClick={() => handleRegularPoint(team, "raids", 1)}
+                        className="bg-green-500 text-white w-full py-3"
                       >
-                        +1.5
+                        +
                       </button>
+                    </>
+                  )}
+                </div>
+                <div>
+                  <h3>Stops: {team.stops}</h3>
+                  {mode === "admin" && (
+                    <>
+                      <div className="w-full min-w-32 flex">
+                        <button
+                          onClick={() => handleFirstPoint(team, "stops")}
+                          className="bg-blue-500 text-white  w-1/2 py-3"
+                        >
+                          +1.5
+                        </button>
+                        <button
+                          onClick={() => handleRegularPoint(team, "stops", -1)}
+                          className="bg-red-500 text-white  w-1/2 py-3"
+                        >
+                          -
+                        </button>
+                      </div>
                       <button
-                        onClick={() => handleRegularPoint(team, "raids", -1)}
-                        className="bg-red-500 text-white py-3 w-1/2"
+                        onClick={() => handleRegularPoint(team, "stops", 1)}
+                        className="bg-green-500 text-white w-full py-3"
                       >
-                        -
+                        +
                       </button>
-                    </div>
-                    <button
-                      onClick={() => handleRegularPoint(team, "raids", 1)}
-                      className="bg-green-500 text-white w-full py-3"
-                    >
-                      +
-                    </button>
-                  </>
-                )}
-              </div>
-              <div>
-                <h3>Stops: {team.stops}</h3>
-                {mode === "admin" && (
-                  <>
-                    <div className="w-full min-w-32 flex">
+                    </>
+                  )}
+                </div>
+                <div>
+                  <h3>Out: {team.out}</h3>
+                  {mode === "admin" && (
+                    <>
+                      <div className="w-full min-w-32 flex">
+                        <button
+                          onClick={() => handleFirstPoint(team, "out")}
+                          className="bg-blue-500 text-white  w-1/2 py-3"
+                        >
+                          +1.5
+                        </button>
+                        <button
+                          onClick={() => handleRegularPoint(team, "out", -1)}
+                          className="bg-red-500 text-white w-1/2 py-3"
+                        >
+                          -
+                        </button>
+                      </div>
                       <button
-                        onClick={() => handleFirstPoint(team, "stops")}
-                        className="bg-blue-500 text-white  w-1/2 py-3"
+                        onClick={() => handleRegularPoint(team, "out", 1)}
+                        className="bg-green-500 text-white w-full py-3"
                       >
-                        +1.5
+                        +
                       </button>
-                      <button
-                        onClick={() => handleRegularPoint(team, "stops", -1)}
-                        className="bg-red-500 text-white  w-1/2 py-3"
-                      >
-                        -
-                      </button>
-                    </div>
-                    <button
-                      onClick={() => handleRegularPoint(team, "stops", 1)}
-                      className="bg-green-500 text-white w-full py-3"
-                    >
-                      +
-                    </button>
-                  </>
-                )}
-              </div>
-              <div>
-                <h3>Out: {team.out}</h3>
-                {mode === "admin" && (
-                  <>
-                    <div className="w-full min-w-32 flex">
-                      <button
-                        onClick={() => handleFirstPoint(team, "out")}
-                        className="bg-blue-500 text-white  w-1/2 py-3"
-                      >
-                        +1.5
-                      </button>
-                      <button
-                        onClick={() => handleRegularPoint(team, "out", -1)}
-                        className="bg-red-500 text-white w-1/2 py-3"
-                      >
-                        -
-                      </button>
-                    </div>
-                    <button
-                      onClick={() => handleRegularPoint(team, "out", 1)}
-                      className="bg-green-500 text-white w-full py-3"
-                    >
-                      +
-                    </button>
-                  </>
-                )}
-              </div>
-              <div>
-                <h3>Double Touch: {team.doubleTouch}</h3>
-                {mode === "admin" && (
-                  <>
-                    <div className="w-full min-w-32 flex">
-                      <button
-                        onClick={() => handleFirstPoint(team, "doubleTouch")}
-                        className="bg-blue-500 text-white w-1/2 py-3"
-                      >
-                        +1.5
-                      </button>
+                    </>
+                  )}
+                </div>
+                <div>
+                  <h3>Double Touch: {team.doubleTouch}</h3>
+                  {mode === "admin" && (
+                    <>
+                      <div className="w-full min-w-32 flex">
+                        <button
+                          onClick={() => handleFirstPoint(team, "doubleTouch")}
+                          className="bg-blue-500 text-white w-1/2 py-3"
+                        >
+                          +1.5
+                        </button>
+                        <button
+                          onClick={() =>
+                            handleRegularPoint(team, "doubleTouch", -1)
+                          }
+                          className="bg-red-500 text-white w-1/2 py-3"
+                        >
+                          -
+                        </button>
+                      </div>
                       <button
                         onClick={() =>
-                          handleRegularPoint(team, "doubleTouch", -1)
+                          handleRegularPoint(team, "doubleTouch", 1)
                         }
-                        className="bg-red-500 text-white w-1/2 py-3"
+                        className="bg-green-500 text-white w-full py-3"
                       >
-                        -
+                        +
                       </button>
-                    </div>
-                    <button
-                      onClick={() => handleRegularPoint(team, "doubleTouch", 1)}
-                      className="bg-green-500 text-white w-full py-3"
-                    >
-                      +
-                    </button>
-                  </>
-                )}
+                    </>
+                  )}
+                </div>
               </div>
             </div>
-          </div>
+          </>
         ))}
       </div>
-      <div className="fixed bottom-0 left-0 right-0 bg-golden text-black py-2 hidden md:block">
-        <div className="flex justify-center items-center px-8">
-          <div className="grid grid-cols-2 text-2xl font-bold mr-10">
-            <div className="mr-4">Raids: {teamA.raids}</div>
-            <div>Stops: {teamA.stops}</div>
-            <div>Out: {teamA.out}</div>
-            <div>DT: {teamA.doubleTouch}</div>
+      {/* <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-16">
+        {selectedTeamA && (
+          <div className="border p-4">
+            <h2 className="text-xl font-bold mb-4">{selectedTeamA.name}</h2>
+            <h3 className="font-bold">Raiders</h3>
+            {selectedTeamA.raiders.map((player, idx) => (
+              <div className="flex justify-between my-1">
+                <p
+                  key={idx}
+                  className={
+                    `${
+                      highlightedPlayer &&
+                      highlightedPlayer.playerId === player._id &&
+                      "bg-blue-500 text-white"
+                    }` + "cursor-pointer hover:bg-gray-200"
+                  }
+                >
+                  {player.name}
+                </p>
+                <div>
+                  <button
+                    onClick={() =>
+                      handlePlayerHighlight(
+                        selectedTeamA._id,
+                        player._id,
+                        "raiders",
+                        player.name
+                      )
+                    }
+                    className="bg-blue-500 text-white px-2 py-1"
+                  >
+                    on Raid
+                  </button>
+                </div>
+              </div>
+            ))}
+            <h3 className="font-bold">Stoppers</h3>
+            {selectedTeamA.stoppers.map((player, idx) => (
+              <p key={idx} className="cursor-pointer hover:bg-gray-200">
+                {player.name}
+              </p>
+            ))}
           </div>
-          <div className="text-4xl font-bold mr-10">{teamA.name}</div>
-          <div className="text-4xl font-bold bg-white text-black px-4 py-2">
-            {teamA.totalPoints} vs {teamB.totalPoints}
+        )}
+        {selectedTeamB && (
+          <div className="border p-4">
+            <h2 className="text-xl font-bold mb-4">{selectedTeamB.name}</h2>
+            <h3 className="font-bold">Raiders</h3>
+            {selectedTeamB.raiders.map((player, idx) => (
+              <div className="flex justify-between my-1">
+                <p
+                  key={idx}
+                  className={
+                    `${
+                      highlightedPlayer &&
+                      highlightedPlayer.playerId === player._id &&
+                      "bg-blue-500 text-white"
+                    }` + "cursor-pointer hover:bg-gray-200"
+                  }
+                >
+                  {player.name}
+                </p>
+                <div>
+                  <button
+                    onClick={() =>
+                      handlePlayerHighlight(
+                        selectedTeamB._id,
+                        player._id,
+                        "raiders",
+                        player.name
+                      )
+                    }
+                    className="bg-blue-500 text-white px-2 py-1"
+                  >
+                    on Raid
+                  </button>
+                </div>
+              </div>
+            ))}
+            <h3 className="font-bold">Stoppers</h3>
+            {selectedTeamB.stoppers.map((player, idx) => (
+              <div>
+                <p key={idx} className="cursor-pointer hover:bg-gray-200">
+                  {player.name}
+                </p>
+              </div>
+            ))}
           </div>
-          <div className="text-4xl font-bold ml-10">{teamB.name}</div>
-          <div className="grid grid-cols-2 text-2xl font-bold ml-10">
-            <div className="flex mr-4">Raids: {teamB.raids}</div>
-            <div>Stops: {teamB.stops}</div>
-            <div>Out: {teamB.out}</div>
-            <div>DT: {teamB.doubleTouch}</div>
-          </div>
-        </div>
-        {/* <div className="flex justify-center items-center px-8">
-          <div className="flex gap-4 text-2xl font-bold mx-6">
-            <div className="flex">Raids: {teamA.raids}</div>
-            <div className="flex">Stops: {teamA.stops}</div>
-          </div>
-          <div className="flex gap-4 text-2xl font-bold mx-24">
-            <div className="flex">Raids: {teamB.raids}</div>
-            <div className="flex">Stops: {teamB.stops}</div>
-          </div>
-        </div> */}
-      </div>
+        )}
+      </div> */}
+      <PlayersList
+        selectedTeamA={selectedTeamA}
+        highlightedPlayer={highlightedRaider}
+        handlePlayerHighlight={handlePlayerHighlight}
+        selectedTeamB={selectedTeamB}
+        handleStopperHighlight={handleStopperHighlight}
+      />
+      <Scoreboard
+        teamA={teamA}
+        teamB={teamB}
+        selectedTeamA={selectedTeamA}
+        selectedTeamB={selectedTeamB}
+        highlightedStopper={highlightedStopper}
+        highlightedRaider={highlightedRaider}
+      />
     </div>
   );
 }
