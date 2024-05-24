@@ -101,6 +101,19 @@ const PlayersList = ({
                 >
                   on Raid
                 </button>
+                <button
+                  //   onClick={() =>
+                  //     handlePlayerHighlight(
+                  //       selectedTeamB._id,
+                  //       player._id,
+                  //       "raiders",
+                  //       player.name
+                  //     )
+                  //   }
+                  className="bg-blue-500 text-white px-2 py-1"
+                >
+                  Point
+                </button>
               </div>
             </div>
           ))}
