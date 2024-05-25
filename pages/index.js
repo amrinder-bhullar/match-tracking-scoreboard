@@ -274,6 +274,40 @@ export default function Home() {
       });
   };
 
+  const hideAllHighlightedPlayers = () => {
+    // Hide highlighted raider if any
+    if (highlightedRaider && highlightedRaider.playerType === "raiders") {
+      fetch("/api/playing_teams/update", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          teamId: highlightedRaider.teamId,
+          playerId: highlightedRaider.playerId,
+          playerType: "raiders",
+          show: false,
+        }),
+      });
+    }
+
+    // Hide highlighted stopper if any
+    if (highlightedStopper && highlightedStopper.playerType === "stoppers") {
+      fetch("/api/playing_teams/update", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          teamId: highlightedStopper.teamId,
+          playerId: highlightedStopper.playerId,
+          playerType: "stoppers",
+          show: false,
+        }),
+      });
+    }
+
+    // Clear highlighted player states
+    setHighlightedRaider(null);
+    setHighlightedStopper(null);
+  };
+
   return (
     <div className="container mx-auto p-4">
       <div className="flex justify-between items-center mb-4">
@@ -297,6 +331,12 @@ export default function Home() {
             }`}
           >
             Client Mode
+          </button>
+          <button
+            onClick={hideAllHighlightedPlayers}
+            className="ml-2 px-4 py-2 bg-gray-200 text-gray-800"
+          >
+            Hide Players
           </button>
         </div>
       </div>
