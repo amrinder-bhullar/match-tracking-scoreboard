@@ -6,9 +6,11 @@ const PlayersList = ({
   handlePlayerHighlight,
   handleStopperHighlight,
   selectedTeamB,
+  handleFirstPoint,
+  handleRegularPoint,
 }) => {
   return (
-    <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-16">
+    <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-28">
       {selectedTeamA && (
         <div className="border p-4">
           <h2 className="text-xl font-bold mb-4">{selectedTeamA.name}</h2>
@@ -38,6 +40,28 @@ const PlayersList = ({
                 >
                   on Raid
                 </button>
+                <>
+                  <div className="w-full min-w-32 flex">
+                    <button
+                      onClick={() => handleFirstPoint(team, "raids")}
+                      className="bg-blue-500 text-white w-1/2 py-3"
+                    >
+                      +1.5
+                    </button>
+                    <button
+                      onClick={() => handleRegularPoint(team, "raids", -1)}
+                      className="bg-red-500 text-white py-3 w-1/2"
+                    >
+                      -
+                    </button>
+                  </div>
+                  <button
+                    onClick={() => handleRegularPoint(team, "raids", 1)}
+                    className="bg-green-500 text-white w-full py-3"
+                  >
+                    +
+                  </button>
+                </>
               </div>
             </div>
           ))}

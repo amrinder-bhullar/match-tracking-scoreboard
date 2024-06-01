@@ -610,15 +610,19 @@ export default function Home() {
         handlePlayerHighlight={handlePlayerHighlight}
         selectedTeamB={selectedTeamB}
         handleStopperHighlight={handleStopperHighlight}
+        handleFirstPoint={handleFirstPoint}
+        handleRegularPoint={handleRegularPoint}
       />
-      <Scoreboard
-        teamA={teamA}
-        teamB={teamB}
-        selectedTeamA={selectedTeamA}
-        selectedTeamB={selectedTeamB}
-        highlightedStopper={highlightedStopper}
-        highlightedRaider={highlightedRaider}
-      />
+      {mode === "client" && (
+        <Scoreboard
+          teamA={teamA}
+          teamB={teamB}
+          selectedTeamA={selectedTeamA}
+          selectedTeamB={selectedTeamB}
+          highlightedStopper={highlightedStopper}
+          highlightedRaider={highlightedRaider}
+        />
+      )}
     </div>
   );
 }

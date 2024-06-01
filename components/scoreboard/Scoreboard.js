@@ -53,45 +53,49 @@ const Scoreboard = ({
   return (
     <div>
       <div className="fixed bottom-0 left-0 right-0 bg-golden text-black min-h-28 py-4 hidden md:block">
-        <div className="flex justify-center items-center px-4">
-          <div
-            className={`w-72 h-11 mr-10 flex items-center ${animationClassA}`}
-          >
-            {TextTeamA && (
-              <div className="text-3xl font-bold">
-                {TextTeamA.playerType === "raiders" ? "On Raid" : "Stopped By"}:{" "}
-                {TextTeamA.playerName}
-              </div>
-            )}
+        <div className="grid grid-cols-3">
+          <div className="flex flex-col gap-y-2 justify-start items-center">
+            <div className="flex gap-x-2 justify-center items-center text-2xl font-bold">
+              <div>Raids: {teamA.raids}</div>
+              <div>Stops: {teamA.stops}</div>
+              <div>Out: {teamA.out}</div>
+              <div>DT: {teamA.doubleTouch}</div>
+            </div>
+            <div
+              className={`flex justify-center items-center ${animationClassA}`}
+            >
+              {TextTeamA && (
+                <div className="text-2xl font-bold">
+                  {TextTeamA.playerType === "raiders" ? "Raider" : "Stopped By"}
+                  : {TextTeamA.playerName}
+                </div>
+              )}
+            </div>
           </div>
-          <div className="grid grid-cols-2 gap-x-2 w-72 justify-end text-2xl font-bold">
-            <div className="w-60">Raids: {teamA.raids}</div>
-            <div>Stops: {teamA.stops}</div>
-            <div>Out: {teamA.out}</div>
-            <div>DT: {teamA.doubleTouch}</div>
+          <div className="flex justify-center items-center px-4">
+            <div className="text-3xl font-bold text-right w-80 mr-4">
+              {teamA.name}
+            </div>
+            <div className="text-4xl min-h-16 min-w-52 font-bold flex justify-center items-center bg-white text-black py-2">
+              {teamA.totalPoints} vs {teamB.totalPoints}
+            </div>
+            <div className="text-3xl font-bold ml-4 w-80">{teamB.name}</div>
           </div>
-          <div className="text-4xl font-bold text-right w-80 mr-4">
-            {teamA.name}
-          </div>
-          <div className="text-4xl min-w-52 font-bold flex justify-center bg-white text-black py-2">
-            {teamA.totalPoints} vs {teamB.totalPoints}
-          </div>
-          <div className="text-4xl font-bold ml-4 w-80">{teamB.name}</div>
-          <div className="grid grid-cols-2 w-72 text-2xl font-bold ml-4">
-            <div className="w-60">Raids: {teamB.raids}</div>
-            <div>Stops: {teamB.stops}</div>
-            <div>Out: {teamB.out}</div>
-            <div>DT: {teamB.doubleTouch}</div>
-          </div>
-          <div
-            className={`w-72 h-11 ml-10 flex items-center ${animationClassB}`}
-          >
-            {TextTeamB && (
-              <div className="text-3xl font-bold">
-                {TextTeamB.playerType === "raiders" ? "On Raid" : "Stopped By"}:{" "}
-                {TextTeamB.playerName}
-              </div>
-            )}
+          <div className="flex flex-col gap-y-2 justify-start items-center">
+            <div className="flex gap-x-2 justify-center items-center text-2xl font-bold">
+              <div>Raids: {teamB.raids}</div>
+              <div>Stops: {teamB.stops}</div>
+              <div>Out: {teamB.out}</div>
+              <div>DT: {teamB.doubleTouch}</div>
+            </div>
+            <div className={`flex items-center ${animationClassB}`}>
+              {TextTeamB && (
+                <div className="text-2xl font-bold">
+                  {TextTeamB.playerType === "raiders" ? "Raider" : "Stopped By"}
+                  : {TextTeamB.playerName}
+                </div>
+              )}
+            </div>
           </div>
         </div>
       </div>
