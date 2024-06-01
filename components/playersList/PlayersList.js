@@ -40,7 +40,7 @@ const PlayersList = ({
                 >
                   on Raid
                 </button>
-                <>
+                {/* <>
                   <div className="w-full min-w-32 flex">
                     <button
                       onClick={() => handleFirstPoint(team, "raids")}
@@ -61,7 +61,7 @@ const PlayersList = ({
                   >
                     +
                   </button>
-                </>
+                </> */}
               </div>
             </div>
           ))}
